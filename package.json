@@ -9,7 +9,9 @@
   "scripts": {
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
-    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview --host 0.0.0.0"
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview --host 0.0.0.0",
+    "ingest": "node scripts/ingest/news.mjs",
+    "ingest:check": "node --test scripts/ingest/news.test.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "4.0.19",

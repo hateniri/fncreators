@@ -345,16 +345,36 @@ main:focus {
   font-size: 0.85rem;
 }
 
-.fresh-label {
+.fresh-label,
+.notice-pill {
   display: inline-flex;
   align-items: center;
   min-height: 22px;
   padding: 0 7px;
   border-radius: 999px;
-  background: var(--lime);
-  color: var(--ink);
   font-size: 0.72rem;
   font-weight: 800;
+}
+
+.fresh-label,
+.notice-confirmed {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.notice-rumor {
+  background: var(--note);
+  color: var(--note-text);
+  border: 1px solid var(--note-line);
+}
+
+.notice-banner {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.6;
 }
 
 .card-title {
