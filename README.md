@@ -56,7 +56,7 @@ Pages のプロジェクト作成時に、次を指定します。
 
 Node.js のバージョンは、リポジトリ直下の `.node-version` を Pages が読みます。ダッシュボードで上書きする場合は、環境変数 `NODE_VERSION` を `22.23.4` にしてください。古いビルドイメージの初期値（Node.js 18 系）のままでは、Astro 6 の要件（22.12 以上）を満たしません。
 
-環境変数や API キーは不要です。
+サイトのビルドに環境変数や API キーは不要です。ニュースの自動取り込みだけ、任意で `FORTNITE_API_KEY` を使えます。無くても動きます。
 
 ビルド後の応答ヘッダーは `public/_headers`、`www.fncreators.com` から `fncreators.com` への転送は `public/_redirects` にあります。どちらも `dist` にコピーされます。
 
@@ -106,11 +106,54 @@ source:
 | `tags` | はい | 1つ以上。タグページ `/tags/名前/` ができます |
 | `summary` | はい | カード、meta description、OGP の説明。140字以内 |
 | `cover` | いいえ | カバー画像。`public/` からのパス（例: `/covers/example.png`）か、`https://` の画像 URL。png / jpg / webp は X の OGP 画像にも使います |
+| `notice` | いいえ | `confirmed`（公式ベース）または `rumor`（未確認）。付いた記事だけ、カードと記事の先頭に区分が出ます。無い記事は編集メモです |
 | `source` | いいえ | `name` と `url`。記事末尾の出典欄になります |
 
 カバー画像ファイルは `public/covers/` など `public/` の下に置きます。本文中の画像も、同じようにサイトルートからのパスか完全な URL にします。
 
-いま入っている5本は、見た目と自動化の形を確認するためのサンプルです。本番の投稿に差し替えて構いません。ファイルを消せば、その記事は次のビルドで消えます。
+初期に入っていた5本は、見た目を確認するための編集メモです。区分ラベルは付いていません。ファイルを消せば、その記事は次のビルドで消えます。
+
+`notice: confirmed` は「公式の公開情報をもとにした非公式のまとめ」、`rumor` は「まだ裏が取れていない」です。自動取り込みは、公式の公開フィードから作った記事に `confirmed` を付けます。リーク用の源は入れていません。人が未確認のメモを書くときは `rumor` にします。
+
+## ニュースの自動取り込み
+
+ログイン不要の公開フィードから、`content/posts/*.md` に新しい記事だけを足します。同じ項目は、本文末尾の `<!-- ingest:... -->` と `scripts/ingest/state.json` で一度だけにします。ファイルを消しても state に ID が残っていれば再作成しません。載せ直すときは、その ID を state から消します。
+
+ソースは次の順です。
+
+| 順 | ソース | 何を取るか |
+| --- | --- | --- |
+| 1 | `https://www.fortnite.com/news.data?lang=ja` と各記事の `.data` | 公式ニュースページの JSON。全文は転載せず、見出しと書き出し、公式の画像 URL |
+| 2 | `https://fortnite-api.com/v2/news?language=ja` | ロビー告知。公式の PRM はトークンが要るので使わない。画像 URL は Epic の CDN |
+| 3 | `https://fortnite-api.com/v2/shop?language=ja` | その回のショップで「新規」の項目と、コラボ寄りの棚の名前 |
+| 4 | `https://status.epicgames.com/api/v2/summary.json` | Fortnite / UEFN 関連が通常以外、または 72 時間以内のメンテナンスのときだけ |
+
+`fortnite.com` は Cloudflare がデータセンター IP を止めることがあります。GitHub Actions でも止まります。その回は公式記事をスキップし、ロビー・ショップ・ステータスは続けます。全部失敗したときだけ、ワークフローは失敗します。
+
+トークンは必須ではありません。`FORTNITE_API_KEY` があれば fortnite-api.com の `Authorization` に載せ、レート制限を緩めるために使います。無い、または 401 のときは、そのキーなしの公開 URL を試します。ショップ画像の多くは fortnite-api.com 上の公式コスメ画像ミラーです。Epic の CDN URL がレスポンスにあれば、そちらを優先します。
+
+直近 30 日（`INGEST_LOOKBACK_DAYS`）より古い公式記事と、古いロビーフィードは捨てます。1 回で足す記事は最大 12 件（`INGEST_MAX_NEW`）です。残りは次の回に回します。
+
+### 手元で実行する
+
+```bash
+npm run ingest:check
+npm run ingest -- --dry-run
+npm run ingest
+npm run build
+```
+
+`ingest:check` はネットワークを使いません。`ingest` はネットワークを使います。
+
+### GitHub Actions と Cloudflare Pages
+
+ワークフローは `.github/workflows/news-ingest.yml` です。UTC の毎時 15 分と 45 分（約 30 分おき）と、手動の `workflow_dispatch` で動きます。GitHub の schedule は遅れることがあります。
+
+新しい記事があるときだけビルドし、`news/ingest-*` ブランチに commit して **PR を開きます**。`main` へは直接 commit しません。このリポジトリに自動マージの仕組みは無いので、見出しと「公式ベース / 未確認」の区分を人が見てからマージします。
+
+`main` へのマージで、Cloudflare Pages の本番ブランチが再ビルドされます。プレビューを有効にしていれば、マージ前の PR でも確認できます。ビルドコマンドと出力先は上の表のままです（`npm run build` / `dist`）。
+
+Actions の Workflow permissions が「Read and write」でないと、PR 用ブランチを push できません。`FORTNITE_API_KEY` はリポジトリ secret として任意です。
 
 ## ページ
 
@@ -126,9 +169,11 @@ source:
 
 ```
 content/posts/     記事 Markdown
+scripts/ingest/    ニュース取り込み
 public/            画像、_headers、_redirects、robots.txt
 src/pages/         ルート
 src/content.config.ts
 astro.config.mjs
 wrangler.toml      Pages の出力先
+.github/workflows/news-ingest.yml
 ```

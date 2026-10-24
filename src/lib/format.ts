@@ -40,8 +40,10 @@ export function xShareHref(title: string, url: string): string {
 }
 
 export function socialImage(cover?: string): string {
-  if (cover && /\.(png|jpe?g|webp)$/i.test(cover.split('?')[0] ?? cover)) {
-    return cover;
-  }
+  if (!cover) return '/og.png';
+  const path = cover.split('?')[0] ?? cover;
+  if (/\.(png|jpe?g|webp|gif)$/i.test(path)) return cover;
+  // fortnite.com のカード画像は拡張子の無い CMS URL のことがある。中身は JPEG。
+  if (/^https:\/\/([\w.-]+\.)?(unrealengine\.com|epicgames\.com)\//i.test(cover)) return cover;
   return '/og.png';
 }

@@ -17,6 +17,8 @@ const posts = defineCollection({
     tags: z.array(z.string().min(1)).min(1),
     summary: z.string().min(1).max(140),
     cover: z.string().min(1).optional(),
+    /** confirmed = 公式の公開情報。rumor = 未確認。無い記事は編集メモ。 */
+    notice: z.enum(['confirmed', 'rumor']).optional(),
     source: z
       .object({
         name: z.string().min(1),

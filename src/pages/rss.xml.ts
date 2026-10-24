@@ -14,7 +14,12 @@ export async function GET(context: APIContext) {
     items: posts.map((post) => ({
       title: post.data.title,
       pubDate: post.data.date,
-      description: post.data.summary,
+      description:
+        post.data.notice === 'rumor'
+          ? `未確認。${post.data.summary}`
+          : post.data.notice === 'confirmed'
+            ? `公式ベース。${post.data.summary}`
+            : post.data.summary,
       link: `/posts/${post.id}/`,
       categories: [...post.data.tags],
     })),

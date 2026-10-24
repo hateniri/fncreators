@@ -20,6 +20,8 @@ const tags = [...new Set(post.data.tags)];
           {formatCardDate(post.data.date)}
         </time>
         {fresh && <span class="fresh-label">新着</span>}
+        {post.data.notice === 'confirmed' && <span class="notice-pill notice-confirmed">公式ベース</span>}
+        {post.data.notice === 'rumor' && <span class="notice-pill notice-rumor">未確認</span>}
       </p>
       <h2 class="card-title">{post.data.title}</h2>
       <p class="card-summary">{post.data.summary}</p>

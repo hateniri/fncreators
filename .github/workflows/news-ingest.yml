@@ -1,0 +1,60 @@
+name: ニュース取り込み
+
+# 30分おき。GitHub の schedule は遅れることがある。
+# 本番の main へは直接置かない。レビュー用の PR を開く。
+on:
+  schedule:
+    - cron: '15,45 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: news-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+          cache: npm
+
+      - name: 依存関係
+        run: npm ci
+
+      - name: 取り込みの単体チェック
+        run: npm run ingest:check
+
+      - name: 公開フィードを取り込む
+        id: ingest
+        env:
+          FORTNITE_API_KEY: ${{ secrets.FORTNITE_API_KEY }}
+        run: npm run ingest
+
+      - name: ビルド
+        if: steps.ingest.outputs.changed == 'true'
+        run: npm run build
+
+      - name: レビュー用 PR を開く
+        if: steps.ingest.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          branch="news/ingest-$(date -u +%Y%m%d-%H%M%S)"
+          git checkout -b "$branch"
+          git add content/posts scripts/ingest/state.json
+          git commit -m "ニュース取り込み: 公開フィードの新規項目を追加"
+          git push -u origin "$branch"
+          gh pr create --base main --head "$branch" --title "ニュース取り込み $(date -u +%Y-%m-%d)" --body-file .github/news-ingest-pr.md

@@ -71,6 +71,20 @@ if (post.data.source) {
 >
   <article>
     <p class="back"><a href="/">← 最新へ</a></p>
+    {
+      post.data.notice === 'rumor' && (
+        <p class="notice-banner notice-rumor">
+          未確認。公式の文章では裏が取れていません。Epic Games や FortniteJP の発表として扱わないでください。
+        </p>
+      )
+    }
+    {
+      post.data.notice === 'confirmed' && (
+        <p class="notice-banner notice-confirmed">
+          公式ベース。公開情報の非公式まとめです。Epic Games、Fortnite、FortniteJP とは関係ありません。
+        </p>
+      )
+    }
     <header>
       <ul class="tag-links">
         {
