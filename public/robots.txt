@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fncreators.com/sitemap-index.xml

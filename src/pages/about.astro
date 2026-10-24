@@ -1,0 +1,71 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+
+const description =
+  'FN Creators JP は非公式ファンサイトです。Epic Games、Fortnite、FortniteJP とは関係ありません。';
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: '非公式ファンサイトについて',
+  url: new URL('/about/', Astro.site).href,
+  description,
+  inLanguage: 'ja',
+  isPartOf: {
+    '@type': 'WebSite',
+    name: SITE.name,
+    url: SITE.url,
+  },
+};
+---
+
+<Base title="非公式ファンサイトについて" description={description} jsonLd={jsonLd}>
+  <article>
+    <header class="page-head">
+      <h1>非公式ファンサイトについて</h1>
+      <p>{SITE.name} / @{SITE.xHandle}</p>
+    </header>
+
+    <section class="about-block">
+      <h2>このサイト</h2>
+      <p>
+        {SITE.name} は、日本の Fortnite / UEFN プレイヤー向けに、短い見出しのニュースと手順メモを届ける非公式ファンサイトです。スマホで流し読みできることを優先しています。運営アカウントは X の
+        <a href={SITE.xUrl} rel="me noopener noreferrer" target="_blank">
+          @{SITE.xHandle}<span class="sr-only">（新しいタブで開きます）</span>
+        </a>
+        です。
+      </p>
+    </section>
+
+    <section class="about-block">
+      <h2>非公式ファンサイトです</h2>
+      <p>
+        このサイトは非公式ファンサイトです。Epic Games, Inc.、Fortnite、FortniteJP、Unreal Editor for Fortnite（UEFN）とは、提携・承認・後援・運営委託の関係にありません。公式の発表は、Epic Games と Fortnite の公式サイトで確認してください。
+      </p>
+      <p>
+        Fortnite、Unreal、UEFN、Epic Games は各権利者の商標です。ここでの記載は話題を特定するためであり、権利は各権利者に帰属します。
+      </p>
+    </section>
+
+    <section class="about-block">
+      <h2>記事の方針</h2>
+      <ul>
+        <li>見出しは短く、本文はスマホで読み切れる長さにします。</li>
+        <li>出典がある記事だけ、出典欄を付けます。出典がない記事は編集部のまとめです。</li>
+        <li>コラボ先の名前は、公式の文章に出てから書きます。</li>
+        <li>未公開の数値や、出典のない画像は扱いません。</li>
+      </ul>
+    </section>
+
+    <section class="about-block">
+      <h2>連絡</h2>
+      <p>
+        誤りの指摘は
+        <a href={SITE.xUrl} rel="me noopener noreferrer" target="_blank">
+          @{SITE.xHandle}<span class="sr-only">（新しいタブで開きます）</span>
+        </a>
+        まで。
+      </p>
+    </section>
+  </article>
+</Base>

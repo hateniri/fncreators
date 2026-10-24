@@ -1,0 +1,47 @@
+---
+import { formatCardDate } from '../lib/format';
+import { postUrl, type Post } from '../lib/posts';
+
+interface Props {
+  post: Post;
+  fresh?: boolean;
+}
+
+const { post, fresh = false } = Astro.props;
+const href = postUrl(post.id);
+const tags = [...new Set(post.data.tags)];
+---
+
+<article class:list={['card', { fresh }]}>
+  <a class="card-link" href={href}>
+    <div class="card-body">
+      <p class="card-meta">
+        <time class="card-time" datetime={post.data.date.toISOString()}>
+          {formatCardDate(post.data.date)}
+        </time>
+        {fresh && <span class="fresh-label">新着</span>}
+      </p>
+      <h2 class="card-title">{post.data.title}</h2>
+      <p class="card-summary">{post.data.summary}</p>
+      <p class="card-tags">
+        {tags.map((tag) => <span>{tag}</span>)}
+      </p>
+    </div>
+    {
+      post.data.cover ? (
+        <img
+          class="thumb"
+          src={post.data.cover}
+          alt=""
+          width="160"
+          height="160"
+          loading={fresh ? 'eager' : 'lazy'}
+          fetchpriority={fresh ? 'high' : 'auto'}
+          decoding="async"
+        />
+      ) : (
+        <span class="thumb-fallback" aria-hidden="true" />
+      )
+    }
+  </a>
+</article>

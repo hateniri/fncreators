@@ -1,0 +1,23 @@
+---
+import { SITE } from '../lib/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <p class="footer-brand">{SITE.name}</p>
+  <p class="footer-disclaimer">
+    {SITE.name} は非公式ファンサイトです。Epic Games、Fortnite、FortniteJP とは一切関係ありません。掲載している名称の権利は各権利者に帰属します。
+  </p>
+  <ul class="footer-links">
+    <li><a href="/about/">このサイトについて</a></li>
+    <li><a href="/tags/">タグ</a></li>
+    <li><a href="/rss.xml">RSS</a></li>
+    <li>
+      <a href={SITE.xUrl} rel="me noopener noreferrer" target="_blank">
+        @{SITE.xHandle}
+        <span class="sr-only">（新しいタブで開きます）</span>
+      </a>
+    </li>
+  </ul>
+  <p class="footer-copy">© {year} {SITE.name}</p>
+</footer>
