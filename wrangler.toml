@@ -1,0 +1,6 @@
+# Static Cloudflare Pages site. There is no Worker entrypoint.
+# Dashboard builds should use `npm run build` and publish `dist`.
+# This file is for an optional manual deploy: `npx wrangler pages deploy`.
+name = "fncreators"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-10-24"

@@ -1,0 +1,31 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPosts, listTags, tagUrl } from '../../lib/posts';
+import { SITE } from '../../lib/site';
+
+const tags = listTags(await getPosts());
+const description = `タグ一覧。${SITE.name} は Fortnite / UEFN の非公式ファンサイトです。`;
+---
+
+<Base title="タグ" description={description}>
+  <header class="page-head">
+    <h1>タグ</h1>
+    <p>記事の分類です。</p>
+  </header>
+  {
+    tags.length === 0 ? (
+      <p class="empty">タグはまだありません。</p>
+    ) : (
+      <ul class="tag-index">
+        {tags.map(({ tag, count }) => (
+          <li>
+            <a href={tagUrl(tag)}>
+              <span>{tag}</span>
+              <span class="count">{count}件</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>

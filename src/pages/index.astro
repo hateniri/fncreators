@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import Feed from '../components/Feed.astro';
+import TagRail from '../components/TagRail.astro';
+import { getPosts, listTags } from '../lib/posts';
+import { SITE } from '../lib/site';
+
+const posts = await getPosts();
+const tags = listTags(posts);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+  inLanguage: 'ja',
+  sameAs: [SITE.xUrl],
+  publisher: {
+    '@type': 'Organization',
+    name: SITE.name,
+    url: SITE.url,
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/icon-512.png', Astro.site).href,
+    },
+  },
+};
+---
+
+<Base
+  title="最新"
+  documentTitle={`${SITE.name} — Fortnite / UEFN 非公式ニュース`}
+  description={SITE.description}
+  jsonLd={jsonLd}
+>
+  <header class="page-head">
+    <h1>最新</h1>
+    <p>新しい順。時刻は日本時間です。</p>
+  </header>
+  <TagRail tags={tags} />
+  <Feed posts={posts} showFresh />
+</Base>

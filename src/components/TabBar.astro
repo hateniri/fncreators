@@ -1,0 +1,38 @@
+---
+const path = Astro.url.pathname;
+const items = [
+  { href: '/', label: '最新', current: path === '/' || path.startsWith('/posts'), icon: 'home' },
+  { href: '/tags/', label: 'タグ', current: path.startsWith('/tags'), icon: 'tag' },
+  { href: '/about/', label: 'このサイト', current: path.startsWith('/about'), icon: 'info' },
+];
+---
+
+<nav class="tabbar" aria-label="モバイルメニュー">
+  <div class="tabbar-inner">
+    {
+      items.map((item) => (
+        <a href={item.href} aria-current={item.current ? 'page' : undefined}>
+          <span class="tab-icon" aria-hidden="true">
+            {item.icon === 'home' && (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+                <path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-8.5z"></path>
+              </svg>
+            )}
+            {item.icon === 'tag' && (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M9 4 7 20M17 4l-2 16M4 9h16M5 15h16"></path>
+              </svg>
+            )}
+            {item.icon === 'info' && (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="8"></circle>
+                <path d="M12 11v6M12 8h.01"></path>
+              </svg>
+            )}
+          </span>
+          <span>{item.label}</span>
+        </a>
+      ))
+    }
+  </div>
+</nav>

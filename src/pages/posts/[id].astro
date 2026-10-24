@@ -1,0 +1,146 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { formatFullDate, socialImage, xShareHref } from '../../lib/format';
+import { getPosts, postUrl, relatedPosts, tagUrl, type Post } from '../../lib/posts';
+import { SITE } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const posts = await getPosts();
+const related = relatedPosts(posts, post);
+const tags = [...new Set(post.data.tags)];
+const canonical = new URL(postUrl(post.id), Astro.site);
+const image = socialImage(post.data.cover);
+const usingDefaultImage = image === '/og.png';
+const shareHref = xShareHref(post.data.title, canonical.href);
+const jsonLd: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: post.data.title,
+  description: post.data.summary,
+  datePublished: post.data.date.toISOString(),
+  dateModified: post.data.date.toISOString(),
+  inLanguage: 'ja',
+  mainEntityOfPage: canonical.href,
+  image: [new URL(image, Astro.site).href],
+  author: {
+    '@type': 'Organization',
+    name: SITE.name,
+    url: SITE.url,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: SITE.name,
+    url: SITE.url,
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/icon-512.png', Astro.site).href,
+    },
+  },
+};
+
+if (post.data.source) {
+  jsonLd.isBasedOn = post.data.source.url;
+}
+---
+
+<Base
+  title={post.data.title}
+  description={post.data.summary}
+  image={image}
+  imageAlt={post.data.title}
+  imageWidth={usingDefaultImage ? 1200 : 1600}
+  imageHeight={usingDefaultImage ? 630 : 1000}
+  ogType="article"
+  published={post.data.date}
+  jsonLd={jsonLd}
+>
+  <article>
+    <p class="back"><a href="/">← 最新へ</a></p>
+    <header>
+      <ul class="tag-links">
+        {
+          tags.map((tag) => (
+            <li>
+              <a href={tagUrl(tag)}>{tag}</a>
+            </li>
+          ))
+        }
+      </ul>
+      <h1 class="article-title">{post.data.title}</h1>
+      <p class="article-time">
+        <time datetime={post.data.date.toISOString()}>{formatFullDate(post.data.date)}</time>
+      </p>
+    </header>
+    {
+      post.data.cover && (
+        <img
+          class="hero"
+          src={post.data.cover}
+          alt=""
+          width="1600"
+          height="1000"
+          fetchpriority="high"
+          decoding="async"
+        />
+      )
+    }
+    <p class="lead">{post.data.summary}</p>
+    <div class="prose">
+      <Content />
+    </div>
+    {
+      post.data.source && (
+        <aside class="source">
+          <p class="source-label">出典</p>
+          <a href={post.data.source.url}>
+            {post.data.source.name}
+            <span class="sr-only">（新しいタブで開きます）</span>
+          </a>
+          <p class="source-note">リンク先は外部のページです。この記事は非公式ファンサイトのまとめです。</p>
+        </aside>
+      )
+    }
+    <div class="share">
+      <a class="share-x" href={shareHref} target="_blank" rel="noopener noreferrer">
+        Xで共有
+        <span class="sr-only">（新しいタブで開きます）</span>
+      </a>
+    </div>
+    <label class="url-field">
+      <span>記事URL</span>
+      <input readonly value={canonical.href} />
+    </label>
+    <p class="article-note">
+      この記事は非公式ファンサイトのまとめです。Epic Games、Fortnite、FortniteJP の発表そのものではありません。
+    </p>
+    {
+      related.length > 0 && (
+        <section class="related" aria-label="関連記事">
+          <h2>関連</h2>
+          <ol class="feed">
+            {related.map((item) => (
+              <li>
+                <ArticleCard post={item} />
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+  </article>
+</Base>

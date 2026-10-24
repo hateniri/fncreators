@@ -1,0 +1,46 @@
+---
+import { SITE } from '../lib/site';
+
+const path = Astro.url.pathname;
+const links = [
+  { href: '/', label: '最新', current: path === '/' || path.startsWith('/posts') },
+  { href: '/tags/', label: 'タグ', current: path.startsWith('/tags') },
+  { href: '/about/', label: 'このサイト', current: path.startsWith('/about') },
+];
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 32 32">
+          <rect width="32" height="32" rx="9" fill="#d6f15a"></rect>
+          <rect x="7" y="8" width="18" height="3.2" rx="1.6" fill="#14171f"></rect>
+          <rect x="7" y="14.4" width="13" height="3.2" rx="1.6" fill="#14171f"></rect>
+          <rect x="7" y="20.8" width="9" height="3.2" rx="1.6" fill="#14171f"></rect>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">{SITE.name}</span>
+        <span class="brand-sub">Fortnite / UEFN</span>
+      </span>
+    </a>
+    <a
+      class="unofficial-pill"
+      href="/about/"
+      aria-current={path.startsWith('/about') ? 'page' : undefined}
+    >
+      非公式
+    </a>
+    <nav class="header-nav" aria-label="主要">
+      {
+        links.map((link) => (
+          <a href={link.href} aria-current={link.current ? 'page' : undefined}>
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+<p class="unofficial-bar" role="note">{SITE.disclaimer}</p>

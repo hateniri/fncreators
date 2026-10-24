@@ -1,0 +1,25 @@
+---
+import ArticleCard from './ArticleCard.astro';
+import type { Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+  showFresh?: boolean;
+}
+
+const { posts, showFresh = false } = Astro.props;
+---
+
+{
+  posts.length === 0 ? (
+    <p class="empty">記事はまだありません。</p>
+  ) : (
+    <ol class="feed">
+      {posts.map((post, index) => (
+        <li>
+          <ArticleCard post={post} fresh={showFresh && index === 0} />
+        </li>
+      ))}
+    </ol>
+  )
+}

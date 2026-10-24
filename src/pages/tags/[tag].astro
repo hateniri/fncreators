@@ -1,0 +1,33 @@
+---
+import Base from '../../layouts/Base.astro';
+import Feed from '../../components/Feed.astro';
+import TagRail from '../../components/TagRail.astro';
+import { getPosts, listTags, postsByTag } from '../../lib/posts';
+import { SITE } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return listTags(posts).map(({ tag }) => ({
+    params: { tag },
+    props: { tag },
+  }));
+}
+
+interface Props {
+  tag: string;
+}
+
+const { tag } = Astro.props;
+const posts = await getPosts();
+const tagged = postsByTag(posts, tag);
+const description = `「${tag}」の記事。${SITE.name} は非公式ファンサイトです。`;
+---
+
+<Base title={tag} description={description}>
+  <header class="page-head">
+    <h1>{tag}</h1>
+    <p>{tagged.length}件。新しい順です。</p>
+  </header>
+  <TagRail tags={listTags(posts)} current={tag} />
+  <Feed posts={tagged} />
+</Base>
